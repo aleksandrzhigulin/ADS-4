@@ -13,7 +13,6 @@ int countPairs1(int *arr, int len, int value) {
 }
 
 int countPairs2(int *arr, int len, int value) {
-  std::sort(arr, arr + len);
   int end = len - 1;
   while (arr[end] > value) {
     end--;
@@ -28,28 +27,48 @@ int countPairs2(int *arr, int len, int value) {
   return counter;
 }
 
-bool binarySearch(const int *arr, int left, int right, int value) {
-  while (left <= right) {
-    int mid = left + (right - left) / 2;
-    if (arr[mid] == value) {
-      return true;
-    } else if (arr[mid] > value) {
-      right = mid - 1;
-    } else {
-      left = mid + 1;
+int firstEnter(int *arr, int l, int r, int x) {
+  if (l <= r) {
+    int mid = l + (r - l) / 2;
+    if ((x > arr[mid - 1] || mid == 0) && arr[mid] == x) {
+      return mid;
+    } else if (x > arr[mid]) {
+      return firstEnter(arr, mid + 1, r, x);
     }
+    return firstEnter(arr, l, mid - 1, x);
   }
-  return false;
+  return -1;
+}
+
+int lastEnter(int *arr, int l, int r, int x, int size) {
+  if (l <= r) {
+    int mid = l + (r - l) / 2;
+    if ((x < arr[mid + 1] || mid == size - 1) && arr[mid] == x) {
+      return mid;
+    } else if (x < arr[mid]) {
+      return lastEnter(arr, l, mid - 1, x, size);
+    }
+    return lastEnter(arr, mid + 1, r, x, size);
+  }
+  return -1;
+}
+
+int cbinsearch(int *arr, int l, int r, int value, int size) {
+  int first = firstEnter(arr, l, r, value);
+
+  if (first == -1) {
+    return 0;
+  }
+
+  int last = lastEnter(arr, l, r, value, size);
+  return last - first + 1;
 }
 
 int countPairs3(int *arr, int len, int value) {
   int counter = 0;
-  std::sort(arr, arr + len);
   for (int i = 0; i < len; i++) {
-    if (binarySearch(arr, i, len - 1, value - arr[i])) {
-      counter = counter + 1;
-    }
+    int find = value - arr[i];
+    counter += cbinsearch(arr, i + 1, len - 1, find, len);
   }
   return counter;
 }
-
